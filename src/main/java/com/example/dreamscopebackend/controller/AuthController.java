@@ -30,20 +30,24 @@ public class AuthController {
         return authService.login(request);
     }
 
-      @PostMapping("/verify")
-      public VerifyResponseDTO verify(@RequestBody VerifyCodeRequestDTO request,
-                                HttpServletRequest request) {
-
+       @PostMapping("/verify")
+    public VerifyResponseDTO verify(
+            @RequestBody @Valid VerifyCodeRequestDTO request,   
+            HttpServletRequest httpRequest) {                   
+    
         VerifyResponseDTO response = authService.verify(request.code());
-
-        request.changeSessionId();
-
-        request.getSession().setAttribute(SessionAuthenticationFilter.SESSION_USER_ID,
-            response.userId().toString()
-    );
-
-    return response;
-}
+    
+        // Rotér session ID for at forhindre Session Fixation
+        httpRequest.changeSessionId();
+    
+        // Sæt brugeroplysninger på den NYE session
+        httpRequest.getSession().setAttribute(
+                SessionAuthenticationFilter.SESSION_USER_ID,
+                response.userId().toString()
+        );
+    
+        return response;
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
