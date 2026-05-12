@@ -1,4 +1,6 @@
 package com.example.dreamscopebackend.dto.response;
 
-public class VerifyResponseDTO {
+import java.util.UUID;
+
+public record VerifyResponseDTO(UUID userId, String email, String nickname, String message) {
 }

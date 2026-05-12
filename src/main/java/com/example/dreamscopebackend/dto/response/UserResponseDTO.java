@@ -1,4 +1,7 @@
 package com.example.dreamscopebackend.dto.response;
 
-public class UserResponseDTO {
+import java.time.Instant;
+import java.util.UUID;
+
+public record UserResponseDTO(UUID userId, String email, String nickname, Instant createdAt) {
 }

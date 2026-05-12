@@ -1,4 +1,16 @@
 package com.example.dreamscopebackend.repository;
 
-public interface DreamRepository {
+import com.example.dreamscopebackend.entity.Dream;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface DreamRepository extends JpaRepository<Dream, UUID> {
+    List<Dream> findByUserUserIdOrderByCreatedAtDesc(UUID userId);
+
+    Optional<Dream> findByDreamIdAndUserUserId(UUID dreamId, UUID userId);
+
+    void deleteByUserUserId(UUID userId);
 }
