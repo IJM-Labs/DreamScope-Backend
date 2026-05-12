@@ -11,6 +11,8 @@ import com.example.dreamscopebackend.repository.UserTermsRepository;
 import com.example.dreamscopebackend.util.HashUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -73,7 +75,18 @@ public class UserService {
         magicLinkRepository.deleteByUserUserId(userId);
         userTermsRepository.deleteByUserUserId(userId);
         userRepository.delete(user);
-        mailService.sendDeletionConfirmation(email);
+//        mailService.sendDeletionConfirmation(email);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit(){
+                try {
+                    mailService.sendDeletionConfirmation(email);
+
+                } catch (Exception ignored) {
+
+               }
+            }
+        });
     }
 
     private User findUser(UUID userId) {
