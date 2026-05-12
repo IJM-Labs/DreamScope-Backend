@@ -8,6 +8,7 @@ import com.example.dreamscopebackend.security.SessionAuthenticationFilter;
 import com.example.dreamscopebackend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
