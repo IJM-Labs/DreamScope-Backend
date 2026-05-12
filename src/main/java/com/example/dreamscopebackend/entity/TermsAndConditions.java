@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -24,7 +25,14 @@ public class TermsAndConditions {
     private String content;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+     private Instant createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+        createdAt = Instant.now();
+        }
+   }
 
     public UUID getTermsId() {
         return termsId;
