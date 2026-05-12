@@ -1,4 +1,6 @@
 package com.example.dreamscopebackend.dto.request;
 
-public class AcceptTermsRequestDTO {
+import java.util.UUID;
+
+public record AcceptTermsRequestDTO(UUID termsId) {
 }

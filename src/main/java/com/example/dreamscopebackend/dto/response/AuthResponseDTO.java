@@ -1,4 +1,4 @@
 package com.example.dreamscopebackend.dto.response;
 
-public class AuthResponseDTO {
+public record AuthResponseDTO(String message) {
 }

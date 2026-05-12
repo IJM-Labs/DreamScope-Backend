@@ -1,4 +1,4 @@
 package com.example.dreamscopebackend.dto.request;
 
-public class UpdateUserRequestDTO {
+public record UpdateUserRequestDTO(String email, String nickname) {
 }

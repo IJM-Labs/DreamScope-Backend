@@ -1,4 +1,4 @@
 package com.example.dreamscopebackend.dto.request;
 
-public class LoginRequestDTO {
+public record LoginRequestDTO(String email, String nickname) {
 }

@@ -1,4 +1,6 @@
 package com.example.dreamscopebackend.security;
 
-public class CookieAuthenticationFilter {
+public final class CookieAuthenticationFilter {
+    private CookieAuthenticationFilter() {
+    }
 }
