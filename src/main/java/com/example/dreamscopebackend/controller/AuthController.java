@@ -30,18 +30,20 @@ public class AuthController {
         return authService.login(request);
     }
 
-    @PostMapping("/verify")
-    public VerifyResponseDTO verify(@RequestBody VerifyCodeRequestDTO request, HttpSession session) {
+      @PostMapping("/verify")
+      public VerifyResponseDTO verify(@RequestBody VerifyCodeRequestDTO request,
+                                HttpServletRequest request) {
+
         VerifyResponseDTO response = authService.verify(request.code());
 
-       // Brugeren har allerede en session ved første request, men får et nyt session-ID efter login
-        // så den gamle session ikke kan genbruges til autentificering.
-        httpRequest.changeSessionId();
-        
-        session.setAttribute(SessionAuthenticationFilter.SESSION_USER_ID,
-                             response.userId().toString());
-        return response;
-    }
+        request.changeSessionId();
+
+        request.getSession().setAttribute(SessionAuthenticationFilter.SESSION_USER_ID,
+            response.userId().toString()
+    );
+
+    return response;
+}
 
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
