@@ -33,7 +33,13 @@ public class AuthController {
     @PostMapping("/verify")
     public VerifyResponseDTO verify(@RequestBody VerifyCodeRequestDTO request, HttpSession session) {
         VerifyResponseDTO response = authService.verify(request.code());
-        session.setAttribute(SessionAuthenticationFilter.SESSION_USER_ID, response.userId().toString());
+
+       // Brugeren har allerede en session ved første request, men får et nyt session-ID efter login
+        // så den gamle session ikke kan genbruges til autentificering.
+        httpRequest.changeSessionId();
+        
+        session.setAttribute(SessionAuthenticationFilter.SESSION_USER_ID,
+                             response.userId().toString());
         return response;
     }
 
