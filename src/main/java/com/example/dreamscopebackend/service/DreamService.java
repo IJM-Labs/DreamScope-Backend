@@ -45,11 +45,13 @@ public class DreamService {
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Dream text is required");
         }
+        String threadId = normalizeThreadId(request.threadId());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User was not found"));
         Dream dream = new Dream();
         dream.setUser(user);
+        dream.setThreadId(threadId);
         dream.setContentEncrypted(encryptionService.encrypt(content));
         Dream savedDream = dreamRepository.save(dream);
 
@@ -82,6 +84,14 @@ public class DreamService {
         dreamRepository.delete(findDreamForUser(userId, dreamId));
     }
 
+    @Transactional
+    public void deleteThread(UUID userId, String threadId) {
+        if (threadId == null || threadId.isBlank()) {
+            throw new IllegalArgumentException("Thread id is required");
+        }
+        dreamRepository.deleteByUserUserIdAndThreadId(userId, threadId);
+    }
+
     private Dream findDreamForUser(UUID userId, UUID dreamId) {
         return dreamRepository.findByDreamIdAndUserUserId(dreamId, userId)
                 .orElseThrow(() -> new DreamNotFoundException("Dream was not found"));
@@ -91,6 +101,7 @@ public class DreamService {
         String content = encryptionService.decrypt(dream.getContentEncrypted());
         return new DreamResponseDTO(
                 dream.getDreamId(),
+                dream.getThreadId(),
                 titleFor(dream, content),
                 content,
                 dream.getCreatedAt(),
@@ -114,5 +125,13 @@ public class DreamService {
             return "New dream chat";
         }
         return fallback.length() > 42 ? fallback.substring(0, 42).trim() : fallback;
+    }
+
+    private String normalizeThreadId(String threadId) {
+        if (threadId == null || threadId.isBlank()) {
+            return "thread-" + UUID.randomUUID();
+        }
+        String cleaned = threadId.trim();
+        return cleaned.length() > 80 ? cleaned.substring(0, 80) : cleaned;
     }
 }

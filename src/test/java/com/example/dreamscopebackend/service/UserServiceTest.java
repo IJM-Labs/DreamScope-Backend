@@ -63,7 +63,7 @@ class UserServiceTest {
     @Test
     void deleteCurrentUserRemovesAllOwnedDataForGdpr() {
         User user = createUser("gdpr@example.com");
-        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Slet mig"));
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Slet mig", "thread-delete-user"));
 
         userService.deleteCurrentUser(user.getUserId());
 

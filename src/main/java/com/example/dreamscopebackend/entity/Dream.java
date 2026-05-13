@@ -30,6 +30,9 @@ public class Dream {
     @Column(name = "title_encrypted")
     private String titleEncrypted;
 
+    @Column(name = "thread_id", length = 80)
+    private String threadId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -58,6 +61,14 @@ public class Dream {
 
     public void setTitleEncrypted(String titleEncrypted) {
         this.titleEncrypted = titleEncrypted;
+    }
+
+    public String getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(String threadId) {
+        this.threadId = threadId;
     }
 
     public Instant getCreatedAt() {
