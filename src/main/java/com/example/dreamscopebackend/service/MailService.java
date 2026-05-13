@@ -22,7 +22,7 @@ public class MailService {
             RestClient.Builder restClientBuilder,
             @Value("${resend.api-key:}") String resendApiKey,
             @Value("${resend.from:no-reply@dreamscope.local}") String fromEmail,
-            @Value("${dreamscope.frontend-url:http://localhost:3000}") String frontendUrl
+            @Value("${dreamscope.frontend-url:http://localhost}") String frontendUrl
     ) {
         this.restClient = restClientBuilder.baseUrl("https://api.resend.com").build();
         this.resendApiKey = resendApiKey == null ? "" : resendApiKey.trim();

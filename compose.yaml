@@ -1,8 +1,18 @@
 services:
+  frontend:
+    build:
+      context: ../DreamScope-Frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - dreamscope-network
+
   app:
     build: .
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file:
       - .env
     environment:
