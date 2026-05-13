@@ -20,7 +20,7 @@ class InterpretationServiceTest {
 
         String interpretation = service.interpret("Jeg falder ud af en bygning");
 
-        assertThat(interpretation).contains("Demo-fortolkning");
+        assertThat(interpretation).contains("Demo interpretation");
         server.verify();
     }
 }

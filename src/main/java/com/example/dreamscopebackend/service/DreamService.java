@@ -43,17 +43,18 @@ public class DreamService {
     public DreamResponseDTO createDream(UUID userId, CreateDreamRequestDTO request) {
         String content = request.content();
         if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Drømmetekst mangler");
+            throw new IllegalArgumentException("Dream text is required");
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Bruger findes ikke"));
+                .orElseThrow(() -> new UserNotFoundException("User was not found"));
         Dream dream = new Dream();
         dream.setUser(user);
         dream.setContentEncrypted(encryptionService.encrypt(content));
         Dream savedDream = dreamRepository.save(dream);
 
         String interpretationText = interpretationService.interpret(content);
+        savedDream.setTitleEncrypted(encryptionService.encrypt(interpretationService.titleFor(content, interpretationText)));
         Interpretation interpretation = new Interpretation();
         interpretation.setDream(savedDream);
         interpretation.setTextEncrypted(encryptionService.encrypt(interpretationText));
@@ -83,13 +84,15 @@ public class DreamService {
 
     private Dream findDreamForUser(UUID userId, UUID dreamId) {
         return dreamRepository.findByDreamIdAndUserUserId(dreamId, userId)
-                .orElseThrow(() -> new DreamNotFoundException("Drøm findes ikke"));
+                .orElseThrow(() -> new DreamNotFoundException("Dream was not found"));
     }
 
     private DreamResponseDTO toResponse(Dream dream) {
+        String content = encryptionService.decrypt(dream.getContentEncrypted());
         return new DreamResponseDTO(
                 dream.getDreamId(),
-                encryptionService.decrypt(dream.getContentEncrypted()),
+                titleFor(dream, content),
+                content,
                 dream.getCreatedAt(),
                 dream.getInterpretations()
                         .stream()
@@ -100,5 +103,16 @@ public class DreamService {
                         ))
                         .toList()
         );
+    }
+
+    private String titleFor(Dream dream, String content) {
+        if (dream.getTitleEncrypted() != null && !dream.getTitleEncrypted().isBlank()) {
+            return encryptionService.decrypt(dream.getTitleEncrypted());
+        }
+        String fallback = content == null ? "" : content.trim().split("[.!?\\n]")[0].trim();
+        if (fallback.isBlank()) {
+            return "New dream chat";
+        }
+        return fallback.length() > 42 ? fallback.substring(0, 42).trim() : fallback;
     }
 }

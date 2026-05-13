@@ -22,7 +22,7 @@ public class MailService {
             RestClient.Builder restClientBuilder,
             @Value("${resend.api-key:}") String resendApiKey,
             @Value("${resend.from:no-reply@dreamscope.local}") String fromEmail,
-            @Value("${dreamscope.frontend-url:http://localhost:3000}") String frontendUrl
+            @Value("${dreamscope.frontend-url:http://localhost}") String frontendUrl
     ) {
         this.restClient = restClientBuilder.baseUrl("https://api.resend.com").build();
         this.resendApiKey = resendApiKey == null ? "" : resendApiKey.trim();
@@ -32,7 +32,7 @@ public class MailService {
 
     public void sendOneTimeCode(String email, String code) {
         if (resendApiKey == null || resendApiKey.isBlank()) {
-            LOGGER.info("DreamScope engangskode for {}: {}", email, code);
+            LOGGER.info("DreamScope one-time code for {}: {}", email, code);
             return;
         }
 
@@ -45,7 +45,7 @@ public class MailService {
                             "from", fromEmail,
                             "to", email,
                             "subject", "Din DreamScope engangskode",
-                            "html", "<p>Din DreamScope engangskode er:</p><h1>" + code + "</h1><p>Koden er gyldig i 10 minutter.</p>"
+                            "html", "<p>Your DreamScope one-time code is:</p><h1>" + code + "</h1><p>The code is valid for 10 minutes.</p>"
                     ))
                     .retrieve()
                     .toBodilessEntity();
@@ -70,7 +70,7 @@ public class MailService {
                             "from", fromEmail,
                             "to", email,
                             "subject", "Din DreamScope konto er slettet",
-                            "html", "<p>Din konto og dine drømmedata er slettet fra DreamScope.</p>"
+                            "html", "<p>Your account and dream data have been deleted from DreamScope.</p>"
                     ))
                     .retrieve()
                     .toBodilessEntity();

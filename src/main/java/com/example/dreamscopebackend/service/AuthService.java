@@ -58,21 +58,21 @@ public class AuthService {
         magicLinkRepository.save(magicLink);
 
         mailService.sendOneTimeCode(email, code);
-        return new AuthResponseDTO("Engangskode sendt, hvis emailen kan modtage post.");
+        return new AuthResponseDTO("One-time code sent if the email can receive mail.");
     }
 
     @Transactional
     public VerifyResponseDTO verify(String code) {
         if (code == null || code.isBlank()) {
-            throw new InvalidTokenException("Kode mangler");
+            throw new InvalidTokenException("One-time code is required");
         }
         MagicLink magicLink = magicLinkRepository.findByTokenHash(HashUtil.sha256(code))
-                .orElseThrow(() -> new InvalidTokenException("Kode er ugyldig"));
+                .orElseThrow(() -> new InvalidTokenException("One-time code is invalid"));
         if (magicLink.isUsed()) {
-            throw new InvalidTokenException("Kode er allerede brugt");
+            throw new InvalidTokenException("One-time code has already been used");
         }
         if (magicLink.getExpiresAt().isBefore(Instant.now())) {
-            throw new TokenExpiredException("Kode er udløbet");
+            throw new TokenExpiredException("One-time code has expired");
         }
 
         magicLink.setUsed(true);
@@ -81,20 +81,20 @@ public class AuthService {
                 user.getUserId(),
                 encryptionService.decrypt(user.getEmailEncrypted()),
                 encryptionService.decrypt(user.getNicknameEncrypted()),
-                "Login verificeret"
+                "Login verified"
         );
     }
 
     private String normalizeEmail(String email) {
         if (email == null || email.isBlank() || !email.contains("@")) {
-            throw new IllegalArgumentException("Email er ugyldig");
+            throw new IllegalArgumentException("Email is invalid");
         }
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
     private String normalizeNickname(String nickname) {
         if (nickname == null || nickname.isBlank()) {
-            throw new IllegalArgumentException("Nickname mangler");
+            throw new IllegalArgumentException("Nickname is required");
         }
         return nickname.trim();
     }

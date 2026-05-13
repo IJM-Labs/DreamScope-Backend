@@ -36,6 +36,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneric(Exception exception) {
         LOGGER.error("Unhandled server error", exception);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected server error");
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "DreamScope is having a technical problem. We are working on a fix. Please try again shortly."
+        );
     }
 }

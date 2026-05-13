@@ -32,7 +32,7 @@ class TermsServiceTest {
         var terms = termsService.getLatestTerms();
 
         assertThat(terms.version()).isEqualTo("1.0");
-        assertThat(terms.content()).contains("krypteret");
+        assertThat(terms.content()).contains("encrypted");
     }
 
     @Test

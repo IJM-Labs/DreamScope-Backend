@@ -22,8 +22,7 @@ Backenden importerer automatisk `.env` fra backend-mappen via `spring.config.imp
 export DREAMSCOPE_ENCRYPTION_KEY="<base64-32-byte-key>"
 export OPENAI_API_KEY="<openai-key>"
 export RESEND_API_KEY="<resend-key>"
-export FRONTEND_URL="http://localhost:3000"
-export CORS_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
+export FRONTEND_URL="http://localhost"
 ```
 
 ## Database
@@ -55,12 +54,20 @@ set +a
 
 Hvis port `3306` allerede er optaget, ret `DB_PORT` og `DB_URL` i `.env`, fx til `3307`.
 
-Start både backend og MySQL i Docker:
+Start frontend, backend og MySQL i Docker:
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
+
+Åbn derefter frontend via Nginx:
+
+```text
+http://localhost
+```
+
+Nginx server de statiske frontend-filer og proxyer alle `/api/*` requests videre til Spring Boot-containeren på `app:8080`. Derfor kalder frontenden samme origin i browseren, mens Docker-netværket forbinder videre til backenden.
 
 ## Postman Login
 
@@ -81,7 +88,7 @@ Content-Type: application/json
 Hvis mailservice ikke er sat op, printes koden i terminalen:
 
 ```text
-DreamScope engangskode for test@example.com: 123456
+DreamScope one-time code for test@example.com: 123456
 ```
 
 Verificer koden:

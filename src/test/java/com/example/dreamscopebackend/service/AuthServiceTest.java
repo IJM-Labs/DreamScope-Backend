@@ -62,7 +62,7 @@ class AuthServiceTest {
     void verifyRejectsUnknownCode() {
         assertThatThrownBy(() -> authService.verify("123456"))
                 .isInstanceOf(InvalidTokenException.class)
-                .hasMessageContaining("Kode er ugyldig");
+                .hasMessageContaining("One-time code is invalid");
     }
 
     @Test
@@ -76,7 +76,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.verify("123456"))
                 .isInstanceOf(TokenExpiredException.class)
-                .hasMessageContaining("Kode er udløbet");
+                .hasMessageContaining("One-time code has expired");
     }
 
     @Test

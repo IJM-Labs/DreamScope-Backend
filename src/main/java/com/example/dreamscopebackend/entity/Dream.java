@@ -27,6 +27,9 @@ public class Dream {
     @Column(name = "content_encrypted", nullable = false, columnDefinition = "TEXT")
     private String contentEncrypted;
 
+    @Column(name = "title_encrypted")
+    private String titleEncrypted;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -47,6 +50,14 @@ public class Dream {
 
     public void setContentEncrypted(String contentEncrypted) {
         this.contentEncrypted = contentEncrypted;
+    }
+
+    public String getTitleEncrypted() {
+        return titleEncrypted;
+    }
+
+    public void setTitleEncrypted(String titleEncrypted) {
+        this.titleEncrypted = titleEncrypted;
     }
 
     public Instant getCreatedAt() {

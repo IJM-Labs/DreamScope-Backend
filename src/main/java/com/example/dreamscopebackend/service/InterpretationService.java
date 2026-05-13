@@ -59,7 +59,69 @@ public class InterpretationService {
         }
     }
 
+    public String titleFor(String dreamContent, String interpretationText) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return fallbackTitle(dreamContent);
+        }
+
+        try {
+            Map<?, ?> response = restClient.post()
+                    .uri("/chat/completions")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .body(Map.of(
+                            "model", model,
+                            "messages", List.of(
+                                    Map.of("role", "system", "content", "Create a calm, short chat title for a dream journal. Return only the title, maximum 6 words."),
+                                    Map.of("role", "user", "content", "Dream: " + dreamContent + "\nInterpretation: " + interpretationText)
+                            ),
+                            "temperature", 0.4
+                    ))
+                    .retrieve()
+                    .body(Map.class);
+
+            List<?> choices = (List<?>) response.get("choices");
+            Map<?, ?> firstChoice = (Map<?, ?>) choices.getFirst();
+            Map<?, ?> message = (Map<?, ?>) firstChoice.get("message");
+            return cleanTitle((String) message.get("content"), dreamContent);
+        } catch (RuntimeException exception) {
+            LOGGER.warn("AI title generation failed. Returning fallback title.", exception);
+            return fallbackTitle(dreamContent);
+        }
+    }
+
     private String fallbackInterpretation() {
-        return "Demo-fortolkning: Drømmen kan pege på følelser, bekymringer eller ønsker, som brugeren arbejder med. Tilføj OPENAI_API_KEY for en rigtig AI-fortolkning.";
+        return "Demo interpretation: This dream may point to feelings, concerns, or wishes the user is processing. Add OPENAI_API_KEY for a real AI interpretation.";
+    }
+
+    private String fallbackTitle(String dreamContent) {
+        if (dreamContent == null || dreamContent.isBlank()) {
+            return "New dream chat";
+        }
+        String cleaned = dreamContent.trim().replaceAll("\\s+", " ");
+        int sentenceEnd = firstSentenceEnd(cleaned);
+        if (sentenceEnd > 0) {
+            cleaned = cleaned.substring(0, sentenceEnd);
+        }
+        return cleaned.length() > 42 ? cleaned.substring(0, 42).trim() : cleaned;
+    }
+
+    private int firstSentenceEnd(String text) {
+        int end = -1;
+        for (char marker : new char[]{'.', '!', '?'}) {
+            int index = text.indexOf(marker);
+            if (index >= 0 && (end == -1 || index < end)) {
+                end = index;
+            }
+        }
+        return end;
+    }
+
+    private String cleanTitle(String title, String dreamContent) {
+        if (title == null || title.isBlank()) {
+            return fallbackTitle(dreamContent);
+        }
+        String cleaned = title.replace("\"", "").replace("Title:", "").trim();
+        return cleaned.length() > 48 ? cleaned.substring(0, 48).trim() : cleaned;
     }
 }

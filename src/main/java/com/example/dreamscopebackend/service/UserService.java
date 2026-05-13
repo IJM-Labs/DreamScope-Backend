@@ -54,7 +54,7 @@ public class UserService {
             userRepository.findByEmailHash(emailHash)
                     .filter(existing -> !existing.getUserId().equals(userId))
                     .ifPresent(existing -> {
-                        throw new IllegalArgumentException("Email er allerede i brug");
+                        throw new IllegalArgumentException("Email is already in use");
                     });
             user.setEmailHash(emailHash);
             user.setEmailEncrypted(encryptionService.encrypt(email));
@@ -78,7 +78,7 @@ public class UserService {
 
     private User findUser(UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Bruger findes ikke"));
+                .orElseThrow(() -> new UserNotFoundException("User was not found"));
     }
 
     private UserResponseDTO toResponse(User user) {
@@ -92,7 +92,7 @@ public class UserService {
 
     private String normalizeEmail(String email) {
         if (email == null || email.isBlank() || !email.contains("@")) {
-            throw new IllegalArgumentException("Email er ugyldig");
+            throw new IllegalArgumentException("Email is invalid");
         }
         return email.trim().toLowerCase(Locale.ROOT);
     }
