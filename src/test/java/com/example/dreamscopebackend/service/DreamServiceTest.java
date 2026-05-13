@@ -44,11 +44,12 @@ class DreamServiceTest {
         Dream storedDream = dreamRepository.findById(response.dreamId()).orElseThrow();
 
         assertThat(response.content()).isEqualTo("Jeg flyver over en by");
+        assertThat(response.title()).isNotBlank();
         assertThat(response.interpretations()).hasSize(1);
-        assertThat(response.interpretations().getFirst().text()).contains("Demo-fortolkning");
+        assertThat(response.interpretations().getFirst().text()).contains("Demo interpretation");
         assertThat(storedDream.getContentEncrypted()).doesNotContain("Jeg flyver over en by");
         assertThat(encryptionService.decrypt(storedDream.getContentEncrypted())).isEqualTo("Jeg flyver over en by");
-        assertThat(storedDream.getInterpretations().getFirst().getTextEncrypted()).doesNotContain("Demo-fortolkning");
+        assertThat(storedDream.getInterpretations().getFirst().getTextEncrypted()).doesNotContain("Demo interpretation");
     }
 
     @Test

@@ -8,6 +8,7 @@ import com.example.dreamscopebackend.security.SessionAuthenticationFilter;
 import com.example.dreamscopebackend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,22 +31,20 @@ public class AuthController {
         return authService.login(request);
     }
 
-       @PostMapping("/verify")
+    @PostMapping("/verify")
     public VerifyResponseDTO verify(
-            @RequestBody @Valid VerifyCodeRequestDTO request,   
-            HttpServletRequest httpRequest) {                   
-    
+            @RequestBody @Valid VerifyCodeRequestDTO request,
+            HttpServletRequest httpRequest) {
         VerifyResponseDTO response = authService.verify(request.code());
-    
-        // Rotér session ID for at forhindre Session Fixation
-        httpRequest.changeSessionId();
-    
-        // Sæt brugeroplysninger på den NYE session
-        httpRequest.getSession().setAttribute(
-                SessionAuthenticationFilter.SESSION_USER_ID,
-                response.userId().toString()
-        );
-    
+
+        HttpSession session = httpRequest.getSession(false);
+        if (session == null) {
+            session = httpRequest.getSession(true);
+        } else {
+            httpRequest.changeSessionId();
+            session = httpRequest.getSession(false);
+        }
+        session.setAttribute(SessionAuthenticationFilter.SESSION_USER_ID, response.userId().toString());
         return response;
     }
 
@@ -55,6 +54,6 @@ public class AuthController {
         if (session != null) {
             session.invalidate();
         }
-        return ResponseEntity.ok(Map.of("message", "Logget ud"));
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
     }
 }

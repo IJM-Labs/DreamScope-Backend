@@ -36,7 +36,7 @@ public class TermsService {
                 .orElseGet(() -> {
                     TermsAndConditions created = new TermsAndConditions();
                     created.setVersion("1.0");
-                    created.setContent("DreamScope behandler drømmedata fortroligt. Data gemmes krypteret og kan slettes af brugeren efter GDPR.");
+                    created.setContent("DreamScope handles dream data confidentially. Data is stored encrypted and can be deleted by the user under GDPR.");
                     return termsRepository.save(created);
                 });
         return toResponse(terms);
@@ -52,9 +52,9 @@ public class TermsService {
             return;
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Bruger findes ikke"));
+                .orElseThrow(() -> new UserNotFoundException("User was not found"));
         TermsAndConditions terms = termsRepository.findById(termsId)
-                .orElseThrow(() -> new IllegalArgumentException("Vilkår findes ikke"));
+                .orElseThrow(() -> new IllegalArgumentException("Terms were not found"));
         UserTerms userTerms = new UserTerms();
         userTerms.setUser(user);
         userTerms.setTerms(terms);
