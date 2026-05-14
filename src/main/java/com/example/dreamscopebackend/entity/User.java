@@ -34,7 +34,7 @@ public class User {
     private Instant createdAt = Instant.now();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Dream> dreams = new ArrayList<>();
+    private List<DreamThread> dreamThreads = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MagicLink> magicLinks = new ArrayList<>();
@@ -74,8 +74,8 @@ public class User {
         return createdAt;
     }
 
-    public List<Dream> getDreams() {
-        return dreams;
+    public List<DreamThread> getDreamThreads() {
+        return dreamThreads;
     }
 
     public List<MagicLink> getMagicLinks() {

@@ -8,11 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DreamRepository extends JpaRepository<Dream, UUID> {
-    List<Dream> findByUserUserIdOrderByCreatedAtDesc(UUID userId);
+    List<Dream> findByThreadUserUserIdOrderByCreatedAtDesc(UUID userId);
 
-    Optional<Dream> findByDreamIdAndUserUserId(UUID dreamId, UUID userId);
+    Optional<Dream> findByDreamIdAndThreadUserUserId(UUID dreamId, UUID userId);
 
-    List<Dream> findByUserUserIdAndThreadIdOrderByCreatedAtDesc(UUID userId, String threadId);
+    List<Dream> findByThreadUserUserIdAndThreadThreadIdOrderByCreatedAtDesc(UUID userId, String threadId);
 
-    void deleteByUserUserId(UUID userId);
+    void deleteByThreadUserUserId(UUID userId);
 }

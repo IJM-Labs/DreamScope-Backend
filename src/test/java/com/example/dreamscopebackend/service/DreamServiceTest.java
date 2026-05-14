@@ -5,6 +5,7 @@ import com.example.dreamscopebackend.dto.request.UpdateThreadTitleRequestDTO;
 import com.example.dreamscopebackend.entity.Dream;
 import com.example.dreamscopebackend.entity.User;
 import com.example.dreamscopebackend.repository.DreamRepository;
+import com.example.dreamscopebackend.repository.DreamThreadRepository;
 import com.example.dreamscopebackend.repository.InterpretationRepository;
 import com.example.dreamscopebackend.repository.UserRepository;
 import com.example.dreamscopebackend.util.HashUtil;
@@ -31,6 +32,9 @@ class DreamServiceTest {
     private DreamRepository dreamRepository;
 
     @Autowired
+    private DreamThreadRepository dreamThreadRepository;
+
+    @Autowired
     private InterpretationRepository interpretationRepository;
 
     @Test
@@ -51,6 +55,8 @@ class DreamServiceTest {
         assertThat(response.interpretations().getFirst().text()).contains("Demo interpretation");
         assertThat(storedDream.getContentEncrypted()).doesNotContain("Jeg flyver over en by");
         assertThat(encryptionService.decrypt(storedDream.getContentEncrypted())).isEqualTo("Jeg flyver over en by");
+        assertThat(storedDream.getThread().getThreadId()).isEqualTo("thread-flying");
+        assertThat(storedDream.getThread().getTitleEncrypted()).isNotBlank();
         assertThat(storedDream.getInterpretations().getFirst().getTextEncrypted()).doesNotContain("Demo interpretation");
     }
 
@@ -76,6 +82,7 @@ class DreamServiceTest {
 
         assertThat(dreamRepository.findAll()).hasSize(1);
         assertThat(dreamRepository.findAll().getFirst().getThreadId()).isEqualTo("thread-other");
+        assertThat(dreamThreadRepository.findByThreadIdAndUserUserId("thread-shared", user.getUserId())).isEmpty();
         assertThat(interpretationRepository.findAll()).hasSize(1);
     }
 
@@ -91,6 +98,9 @@ class DreamServiceTest {
                 .filteredOn(dream -> dream.threadId().equals("thread-rename"))
                 .extracting("title")
                 .containsOnly("Tænder der falder");
+        assertThat(dreamThreadRepository.findByThreadIdAndUserUserId("thread-rename", user.getUserId()))
+                .hasValueSatisfying(thread ->
+                        assertThat(encryptionService.decrypt(thread.getTitleEncrypted())).isEqualTo("Tænder der falder"));
     }
 
     private User createUser(String email) {
