@@ -1,6 +1,7 @@
 package com.example.dreamscopebackend.service;
 
 import com.example.dreamscopebackend.dto.request.CreateDreamRequestDTO;
+import com.example.dreamscopebackend.dto.request.UpdateThreadTitleRequestDTO;
 import com.example.dreamscopebackend.dto.response.DreamResponseDTO;
 import com.example.dreamscopebackend.dto.response.InterpretationResponseDTO;
 import com.example.dreamscopebackend.entity.Dream;
@@ -86,15 +87,41 @@ public class DreamService {
 
     @Transactional
     public void deleteThread(UUID userId, String threadId) {
-        if (threadId == null || threadId.isBlank()) {
-            throw new IllegalArgumentException("Thread id is required");
+        List<Dream> dreams = dreamsForThread(userId, threadId);
+        dreamRepository.deleteAll(dreams);
+    }
+
+    @Transactional
+    public void updateThreadTitle(UUID userId, String threadId, UpdateThreadTitleRequestDTO request) {
+        String title = request.title();
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Thread title is required");
         }
-        dreamRepository.deleteByUserUserIdAndThreadId(userId, threadId);
+
+        String cleanedTitle = title.trim();
+        if (cleanedTitle.length() > 80) {
+            cleanedTitle = cleanedTitle.substring(0, 80).trim();
+        }
+
+        String encryptedTitle = encryptionService.encrypt(cleanedTitle);
+        dreamsForThread(userId, threadId).forEach(dream -> dream.setTitleEncrypted(encryptedTitle));
     }
 
     private Dream findDreamForUser(UUID userId, UUID dreamId) {
         return dreamRepository.findByDreamIdAndUserUserId(dreamId, userId)
                 .orElseThrow(() -> new DreamNotFoundException("Dream was not found"));
+    }
+
+    private List<Dream> dreamsForThread(UUID userId, String threadId) {
+        if (threadId == null || threadId.isBlank()) {
+            throw new IllegalArgumentException("Thread id is required");
+        }
+
+        List<Dream> dreams = dreamRepository.findByUserUserIdAndThreadIdOrderByCreatedAtDesc(userId, threadId);
+        if (dreams.isEmpty()) {
+            throw new DreamNotFoundException("Dream thread was not found");
+        }
+        return dreams;
     }
 
     private DreamResponseDTO toResponse(Dream dream) {

@@ -12,7 +12,7 @@ public interface DreamRepository extends JpaRepository<Dream, UUID> {
 
     Optional<Dream> findByDreamIdAndUserUserId(UUID dreamId, UUID userId);
 
-    void deleteByUserUserIdAndThreadId(UUID userId, String threadId);
+    List<Dream> findByUserUserIdAndThreadIdOrderByCreatedAtDesc(UUID userId, String threadId);
 
     void deleteByUserUserId(UUID userId);
 }
