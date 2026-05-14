@@ -38,12 +38,13 @@ class DreamServiceTest {
 
         var response = dreamService.createDream(
                 user.getUserId(),
-                new CreateDreamRequestDTO("Jeg flyver over en by")
+                new CreateDreamRequestDTO("Jeg flyver over en by", "thread-flying")
         );
 
         Dream storedDream = dreamRepository.findById(response.dreamId()).orElseThrow();
 
         assertThat(response.content()).isEqualTo("Jeg flyver over en by");
+        assertThat(response.threadId()).isEqualTo("thread-flying");
         assertThat(response.title()).isNotBlank();
         assertThat(response.interpretations()).hasSize(1);
         assertThat(response.interpretations().getFirst().text()).contains("Demo interpretation");
@@ -55,12 +56,25 @@ class DreamServiceTest {
     @Test
     void deleteDreamDeletesInterpretationsThroughCascade() {
         User user = createUser("delete-dream@example.com");
-        var response = dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("En dør åbner sig"));
+        var response = dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("En dør åbner sig", "thread-door"));
 
         dreamService.deleteDream(user.getUserId(), response.dreamId());
 
         assertThat(dreamRepository.findById(response.dreamId())).isEmpty();
         assertThat(interpretationRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void deleteThreadDeletesAllDreamsInThatThreadOnly() {
+        User user = createUser("delete-thread@example.com");
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Første drøm", "thread-shared"));
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Anden drøm", "thread-shared"));
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Tredje drøm", "thread-other"));
+
+        dreamService.deleteThread(user.getUserId(), "thread-shared");
+
+        assertThat(dreamRepository.findAll()).hasSize(1);
+        assertThat(dreamRepository.findAll().getFirst().getThreadId()).isEqualTo("thread-other");
     }
 
     private User createUser(String email) {

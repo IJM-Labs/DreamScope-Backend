@@ -48,6 +48,12 @@ public class DreamController {
         dreamService.deleteDream(currentUserId(authentication), id);
     }
 
+    @DeleteMapping("/threads/{threadId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteThread(@PathVariable String threadId, Authentication authentication) {
+        dreamService.deleteThread(currentUserId(authentication), threadId);
+    }
+
     private UUID currentUserId(Authentication authentication) {
         return UUID.fromString(authentication.getName());
     }

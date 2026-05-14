@@ -1,26 +1,27 @@
 package com.example.dreamscopebackend.service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 class InterpretationServiceTest {
+
     @Test
-    void interpretReturnsFallbackWhenAiServiceFails() {
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        InterpretationService service = new InterpretationService(builder, "test-key", "test-model");
-        server.expect(requestTo("https://api.openai.com/v1/chat/completions"))
-                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+    void interpretRefusesClearlyOffTopicRequests() {
+        InterpretationService service = new InterpretationService(RestClient.builder(), "", "gpt-4.1-mini");
 
-        String interpretation = service.interpret("Jeg falder ud af en bygning");
+        String response = service.interpret("Hvad er opskriften på et spejlæg?");
 
-        assertThat(interpretation).contains("Demo interpretation");
-        server.verify();
+        assertThat(response).contains("kun hjælpe med drømme");
+    }
+
+    @Test
+    void interpretAllowsDreamsThatMentionOffTopicWords() {
+        InterpretationService service = new InterpretationService(RestClient.builder(), "", "gpt-4.1-mini");
+
+        String response = service.interpret("Jeg drømte at jeg lavede et spejlæg i et mørkt køkken");
+
+        assertThat(response).contains("Demo interpretation");
     }
 }

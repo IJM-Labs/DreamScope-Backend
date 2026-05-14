@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record DreamResponseDTO(
         UUID dreamId,
+        String threadId,
         String title,
         String content,
         Instant createdAt,
