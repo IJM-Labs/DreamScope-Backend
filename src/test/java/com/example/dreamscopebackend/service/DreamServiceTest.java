@@ -1,6 +1,7 @@
 package com.example.dreamscopebackend.service;
 
 import com.example.dreamscopebackend.dto.request.CreateDreamRequestDTO;
+import com.example.dreamscopebackend.dto.request.UpdateThreadTitleRequestDTO;
 import com.example.dreamscopebackend.entity.Dream;
 import com.example.dreamscopebackend.entity.User;
 import com.example.dreamscopebackend.repository.DreamRepository;
@@ -75,6 +76,21 @@ class DreamServiceTest {
 
         assertThat(dreamRepository.findAll()).hasSize(1);
         assertThat(dreamRepository.findAll().getFirst().getThreadId()).isEqualTo("thread-other");
+        assertThat(interpretationRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void updateThreadTitleAppliesToAllDreamsInThread() {
+        User user = createUser("rename-thread@example.com");
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Første drøm", "thread-rename"));
+        dreamService.createDream(user.getUserId(), new CreateDreamRequestDTO("Anden drøm", "thread-rename"));
+
+        dreamService.updateThreadTitle(user.getUserId(), "thread-rename", new UpdateThreadTitleRequestDTO("Tænder der falder"));
+
+        assertThat(dreamService.getDreams(user.getUserId()))
+                .filteredOn(dream -> dream.threadId().equals("thread-rename"))
+                .extracting("title")
+                .containsOnly("Tænder der falder");
     }
 
     private User createUser(String email) {

@@ -1,6 +1,7 @@
 package com.example.dreamscopebackend.controller;
 
 import com.example.dreamscopebackend.dto.request.CreateDreamRequestDTO;
+import com.example.dreamscopebackend.dto.request.UpdateThreadTitleRequestDTO;
 import com.example.dreamscopebackend.dto.response.DreamResponseDTO;
 import com.example.dreamscopebackend.service.DreamService;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -52,6 +54,16 @@ public class DreamController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteThread(@PathVariable String threadId, Authentication authentication) {
         dreamService.deleteThread(currentUserId(authentication), threadId);
+    }
+
+    @PutMapping("/threads/{threadId}/title")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateThreadTitle(
+            @PathVariable String threadId,
+            @RequestBody UpdateThreadTitleRequestDTO request,
+            Authentication authentication
+    ) {
+        dreamService.updateThreadTitle(currentUserId(authentication), threadId, request);
     }
 
     private UUID currentUserId(Authentication authentication) {
