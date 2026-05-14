@@ -53,7 +53,7 @@ public class DreamService {
         }
         String threadId = normalizeThreadId(request.threadId());
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUserIdForUpdate(userId)
                 .orElseThrow(() -> new UserNotFoundException("User was not found"));
         DreamThread thread = findOrCreateThread(user, threadId);
         Dream dream = new Dream();
