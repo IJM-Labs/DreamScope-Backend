@@ -5,6 +5,7 @@ import com.example.dreamscopebackend.dto.response.UserResponseDTO;
 import com.example.dreamscopebackend.entity.User;
 import com.example.dreamscopebackend.exception.UserNotFoundException;
 import com.example.dreamscopebackend.repository.DreamRepository;
+import com.example.dreamscopebackend.repository.DreamThreadRepository;
 import com.example.dreamscopebackend.repository.MagicLinkRepository;
 import com.example.dreamscopebackend.repository.UserRepository;
 import com.example.dreamscopebackend.repository.UserTermsRepository;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final DreamRepository dreamRepository;
+    private final DreamThreadRepository dreamThreadRepository;
     private final MagicLinkRepository magicLinkRepository;
     private final UserTermsRepository userTermsRepository;
     private final EncryptionService encryptionService;
@@ -27,6 +29,7 @@ public class UserService {
     public UserService(
             UserRepository userRepository,
             DreamRepository dreamRepository,
+            DreamThreadRepository dreamThreadRepository,
             MagicLinkRepository magicLinkRepository,
             UserTermsRepository userTermsRepository,
             EncryptionService encryptionService,
@@ -34,6 +37,7 @@ public class UserService {
     ) {
         this.userRepository = userRepository;
         this.dreamRepository = dreamRepository;
+        this.dreamThreadRepository = dreamThreadRepository;
         this.magicLinkRepository = magicLinkRepository;
         this.userTermsRepository = userTermsRepository;
         this.encryptionService = encryptionService;
@@ -69,7 +73,8 @@ public class UserService {
     public void deleteCurrentUser(UUID userId) {
         User user = findUser(userId);
         String email = encryptionService.decrypt(user.getEmailEncrypted());
-        dreamRepository.deleteByUserUserId(userId);
+        dreamRepository.deleteByThreadUserUserId(userId);
+        dreamThreadRepository.deleteByUserUserId(userId);
         magicLinkRepository.deleteByUserUserId(userId);
         userTermsRepository.deleteByUserUserId(userId);
         userRepository.delete(user);

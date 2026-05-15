@@ -27,18 +27,12 @@ public class Dream {
     @Column(name = "content_encrypted", nullable = false, columnDefinition = "TEXT")
     private String contentEncrypted;
 
-    @Column(name = "title_encrypted")
-    private String titleEncrypted;
-
-    @Column(name = "thread_id", length = 80)
-    private String threadId;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "dream_thread_id", nullable = false)
+    private DreamThread thread;
 
     @OneToMany(mappedBy = "dream", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Interpretation> interpretations = new ArrayList<>();
@@ -55,32 +49,20 @@ public class Dream {
         this.contentEncrypted = contentEncrypted;
     }
 
-    public String getTitleEncrypted() {
-        return titleEncrypted;
-    }
-
-    public void setTitleEncrypted(String titleEncrypted) {
-        this.titleEncrypted = titleEncrypted;
-    }
-
     public String getThreadId() {
-        return threadId;
-    }
-
-    public void setThreadId(String threadId) {
-        this.threadId = threadId;
+        return thread == null ? null : thread.getThreadId();
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public User getUser() {
-        return user;
+    public DreamThread getThread() {
+        return thread;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setThread(DreamThread thread) {
+        this.thread = thread;
     }
 
     public List<Interpretation> getInterpretations() {
