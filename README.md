@@ -69,6 +69,47 @@ http://localhost
 
 Nginx server de statiske frontend-filer og proxyer alle `/api/*` requests videre til Spring Boot-containeren på `app:8080`. Derfor kalder frontenden samme origin i browseren, mens Docker-netværket forbinder videre til backenden.
 
+## Production Docker på DigitalOcean
+
+Til MVP kan DreamScope køres med MySQL i Docker på DigitalOcean. Brug production-filen, så databasen kun er tilgængelig internt i Docker-netværket og gemmer data i et persistent Docker volume.
+
+1. Klon backend og frontend på serveren, så mapperne ligger som søskende:
+
+```text
+DreamScope-Backend/
+DreamScope-Frontend/
+```
+
+2. Opret production environment-filen:
+
+```bash
+cp .env.production.example .env.production
+```
+
+Udfyld stærke værdier til `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `DREAMSCOPE_ENCRYPTION_KEY`, `OPENAI_API_KEY`, `RESEND_API_KEY` og `FRONTEND_URL`.
+
+3. Start appen:
+
+```bash
+docker compose --env-file .env.production -f compose.prod.yaml up -d --build
+```
+
+4. Tjek at containerne kører:
+
+```bash
+docker compose --env-file .env.production -f compose.prod.yaml ps
+```
+
+MySQL publicerer ikke port `3306` i production. Backenden forbinder til databasen via Docker service-navnet `db`.
+
+Lav en database-backup med:
+
+```bash
+scripts/backup-mysql.sh
+```
+
+Backup-filer gemmes lokalt i `backups/mysql/` og er ignoreret af Git. Kopier dem regelmæssigt væk fra serveren, fx til DigitalOcean Spaces.
+
 ## Postman Login
 
 Opret eller login bruger:
