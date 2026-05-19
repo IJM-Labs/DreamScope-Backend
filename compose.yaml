@@ -1,10 +1,23 @@
 services:
+  frontend:
+    build:
+      context: ../DreamScope-Frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - dreamscope-network
+
   app:
     build: .
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file:
       - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_URL: jdbc:mysql://db:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     depends_on:
       db:
         condition: service_healthy
@@ -13,6 +26,8 @@ services:
 
   db:
     image: mysql:8.0
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USERNAME}
@@ -21,10 +36,11 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${DB_USERNAME} -p${DB_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
     networks:
       - dreamscope-network
 

@@ -9,6 +9,9 @@ target/
 .env.local
 .env.production
 
+# Production backups
+backups/
+
 ### STS ###
 .apt_generated
 .classpath
