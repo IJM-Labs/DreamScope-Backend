@@ -53,5 +53,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/dreamscope-backend:latest
-            ghcr.io/${{ github.repository_owner }}/dreamscope-backend:${{ github.sha }}
+            ghcr.io/ijm-labs/dreamscope-backend:latest
+            ghcr.io/ijm-labs/dreamscope-backend:${{ github.sha }}
