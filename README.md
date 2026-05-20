@@ -1,161 +1,260 @@
-# DreamScope-Backend
+# DreamScope Backend
 
-Spring Boot backend til DreamScope, hvor brugere logger ind via engangskode og får AI-fortolket nattedrømme.
+Backend til DreamScope – en Spring Boot applikation der håndterer autentificering, AI-fortolkning af drømme, datalagring og sikkerhed.
 
-## Sikkerhed og GDPR
+---
 
-- Email, nickname, drømmeindhold og AI-fortolkninger gemmes krypteret med AES-256-GCM.
-- Email slås op via SHA-256 hash, så databasen kan håndhæve unik email uden at gemme email i klartekst.
-- Login-koder gemmes kun som SHA-256 hash og udløber efter 10 minutter.
-- `DELETE /api/users/me` sletter bruger, drømme, fortolkninger, magic links og accepterede vilkår via cascade.
-- Sæt altid en unik produktionsnøgle i `DREAMSCOPE_ENCRYPTION_KEY`. Den skal være 32 bytes Base64, fx:
+# Funktioner
+
+- Login via magic link / engangskode
+- AI-fortolkning af drømme
+- Mailudsendelse
+- Brugerhåndtering
+- Krypteret datalagring
+- GDPR-compliant løsning
+- Docker deployment
+
+---
+
+# Teknologier
+
+## Backend
+- Java
+- Spring Boot
+- REST API
+
+## Database
+- H2
+- MySQL
+
+## Infrastruktur
+- Docker
+- Docker Compose
+- Nginx
+
+## Integrationer
+- OpenAI
+- Resend
+
+---
+
+# Sikkerhed og GDPR
+
+Projektet indeholder:
+
+- AES-256-GCM kryptering af data
+- SHA-256 hashing af email
+- Magic links med udløb
+- Sessionbaseret autentificering
+- Permanent datasletning
+
+Følgende data krypteres:
+
+- Email
+- Nickname
+- Drømme
+- AI-fortolkninger
+
+Brugersletning:
+
+```text
+DELETE /api/users/me
+```
+
+sletter:
+
+- Bruger
+- Drømme
+- Fortolkninger
+- Magic links
+- Accepterede vilkår
+
+Generér produktionsnøgle:
 
 ```bash
 openssl rand -base64 32
 ```
 
-## Miljøvariabler
+---
 
-Backenden importerer automatisk `.env` fra backend-mappen via `spring.config.import`.
+# Miljøvariabler
+
+Projektet understøtter `.env`.
+
+Eksempel:
 
 ```bash
-export DREAMSCOPE_ENCRYPTION_KEY="<base64-32-byte-key>"
-export OPENAI_API_KEY="<openai-key>"
-export RESEND_API_KEY="<resend-key>"
-export FRONTEND_URL="http://localhost"
+export DREAMSCOPE_ENCRYPTION_KEY=""
+export OPENAI_API_KEY=""
+export RESEND_API_KEY=""
+export FRONTEND_URL=""
 ```
 
-## Database
+---
 
-H2 er standardprofilen og virker uden Docker:
+# Lokal udvikling
+
+## H2 (standard)
+
+Start backend:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-H2 console er aktiv på `/h2-console` med JDBC URL `jdbc:h2:mem:dreamscope`.
+Database:
 
-Start kun MySQL-databasen til lokal udvikling:
+```text
+jdbc:h2:mem:dreamscope
+```
+
+Console:
+
+```text
+/h2-console
+```
+
+---
+
+## MySQL
+
+Start database:
 
 ```bash
 cp .env.example .env
+
 docker compose -f compose.dev.yaml up -d
+```
+
+Start backend:
+
+```bash
 SPRING_PROFILES_ACTIVE=mysql ./mvnw spring-boot:run
 ```
 
-Hvis du bruger værdierne fra `.env` direkte i terminalen, så indlæs dem først:
+Indlæs `.env` manuelt hvis nødvendigt:
 
 ```bash
 set -a
 source .env
 set +a
-./mvnw spring-boot:run
 ```
 
-Hvis port `3306` allerede er optaget, ret `DB_PORT` og `DB_URL` i `.env`, fx til `3307`.
+---
 
-Start frontend, backend og MySQL i Docker:
+# Docker
+
+Start hele stacken:
 
 ```bash
 cp .env.example .env
+
 docker compose up --build
 ```
 
-Åbn derefter frontend via Nginx:
+Åbn:
 
 ```text
 http://localhost
 ```
 
-Nginx server de statiske frontend-filer og proxyer alle `/api/*` requests videre til Spring Boot-containeren på `app:8080`. Derfor kalder frontenden samme origin i browseren, mens Docker-netværket forbinder videre til backenden.
+Docker indeholder:
 
-## Production Docker på DigitalOcean
+- Frontend
+- Backend
+- Database
+- Nginx
 
-Til MVP kan DreamScope køres med MySQL i Docker på DigitalOcean. Brug production-filen, så databasen kun er tilgængelig internt i Docker-netværket og gemmer data i et persistent Docker volume.
+---
 
-1. Klon backend og frontend på serveren, så mapperne ligger som søskende:
+# Production
+
+Deploy til DigitalOcean.
+
+Struktur:
 
 ```text
 DreamScope-Backend/
 DreamScope-Frontend/
 ```
 
-2. Opret production environment-filen:
+Opsæt miljø:
 
 ```bash
 cp .env.production.example .env.production
 ```
 
-Udfyld stærke værdier til `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `DREAMSCOPE_ENCRYPTION_KEY`, `OPENAI_API_KEY`, `RESEND_API_KEY` og `FRONTEND_URL`.
-
-3. Start appen:
+Start:
 
 ```bash
-docker compose --env-file .env.production -f compose.prod.yaml up -d --build
+docker compose \
+--env-file .env.production \
+-f compose.prod.yaml \
+up -d --build
 ```
 
-4. Tjek at containerne kører:
+Status:
 
 ```bash
-docker compose --env-file .env.production -f compose.prod.yaml ps
+docker compose ps
 ```
 
-MySQL publicerer ikke port `3306` i production. Backenden forbinder til databasen via Docker service-navnet `db`.
-
-Lav en database-backup med:
+Backup:
 
 ```bash
 scripts/backup-mysql.sh
 ```
 
-Backup-filer gemmes lokalt i `backups/mysql/` og er ignoreret af Git. Kopier dem regelmæssigt væk fra serveren, fx til DigitalOcean Spaces.
+---
 
-## Postman Login
+# API Test
 
-Opret eller login bruger:
+Login:
 
 ```http
 POST /api/auth/login
-Content-Type: application/json
 ```
 
 ```json
 {
-  "email": "test@example.com",
-  "nickname": "Night Owl"
+  "email":"test@example.com",
+  "nickname":"Night Owl"
 }
 ```
 
-Hvis mailservice ikke er sat op, printes koden i terminalen:
-
-```text
-DreamScope one-time code for test@example.com: 123456
-```
-
-Verificer koden:
+Verificering:
 
 ```http
 POST /api/auth/verify
-Content-Type: application/json
 ```
 
 ```json
 {
-  "code": "123456"
+  "code":"123456"
 }
 ```
 
-## TDD
+---
 
-Al videre backend-udvikling skal følge test-first:
+# Test
 
-1. Skriv eller opdater en test for kravet.
-2. Kør testen og se den fejle.
-3. Implementer mindst mulig kode for at gøre testen grøn.
-4. Refaktorer med hele testpakken grøn.
+Projektet følger TDD.
 
-Kør hele pakken med:
+Proces:
+
+1. Skriv test
+2. Kør test
+3. Implementér
+4. Refaktorér
+
+Kør tests:
 
 ```bash
 ./mvnw clean test
 ```
+
+---
+
+# Team
+
+DreamScope projektgruppe
